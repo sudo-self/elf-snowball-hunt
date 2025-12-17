@@ -1,0 +1,2168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elf Snowball Hunt - Enhanced Edition!</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Arial Rounded MT Bold', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0a1e3d 0%, #1a4d7a 50%, #0f2b4d 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            padding: 12px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* HEADER */
+        header {
+            text-align: center;
+            padding: 10px 0;
+            position: relative;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            text-shadow: 3px 3px 0 #0a1e3d, 0 0 25px #4facfe, 0 0 40px #00b3ff;
+            margin-bottom: 5px;
+            animation: titleGlow 2s ease-in-out infinite, float 3s ease-in-out infinite;
+            background: linear-gradient(to right, #ff6b6b, #4facfe, #4facfe, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            padding: 0 10px;
+        }
+
+        @keyframes titleGlow {
+            0%, 100% { text-shadow: 3px 3px 0 #0a1e3d, 0 0 25px #4facfe, 0 0 40px #00b3ff; }
+            50% { text-shadow: 3px 3px 0 #0a1e3d, 0 0 35px #4facfe, 0 0 60px #00b3ff; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            text-shadow: 1px 1px 3px #0a1e3d;
+            color: #cce7ff;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.4;
+        }
+
+        /* STATS */
+        .game-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            width: 100%;
+            max-width: 900px;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, rgba(74,144,226,.25), rgba(80,227,194,.25));
+            border-radius: 16px;
+            border: 3px solid rgba(255,255,255,.2);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-stats::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            100% { left: 100%; }
+        }
+
+        .stat-box {
+            text-align: center;
+            padding: 8px;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-box:hover {
+            transform: translateY(-3px);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #a3d5ff;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 1.9rem;
+            font-weight: bold;
+            text-shadow: 0 0 15px rgba(79,172,254,.9);
+            color: #ffffff;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* POWERUP BAR */
+        .powerup-bar {
+            width: 100%;
+            max-width: 900px;
+            height: 20px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid rgba(255,255,255,0.2);
+            margin-bottom: 5px;
+            position: relative;
+        }
+
+        .powerup-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #4facfe);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 8px;
+        }
+
+        /* GAME AREA */
+        .game-area {
+            position: relative;
+            width: 100%;
+            max-width: 1000px;
+            height: min(55vh, 540px);
+            min-height: 360px;
+            border-radius: 20px;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #87ceeb, #e0f6ff, #ffffff);
+            border: 4px solid rgba(255,255,255,.6);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            transition: all 0.3s ease;
+        }
+
+        .game-area:hover {
+            box-shadow: 0 25px 60px rgba(0,0,0,0.7);
+        }
+
+        #game-canvas {
+            position: absolute;
+            inset: 0;
+        }
+
+        /* CONTROLS */
+        .controls {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .instructions {
+            width: 100%;
+            padding: 12px 20px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(74,144,226,.3), rgba(80,227,194,.3));
+            border-radius: 14px;
+            border: 2px solid rgba(255,255,255,.25);
+            backdrop-filter: blur(10px);
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 28px;
+            font-size: 1.05rem;
+            font-weight: bold;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        button:hover {
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.5);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        #reset-btn {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+            color: white;
+            min-width: 200px;
+        }
+
+        #sound-btn {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: white;
+            min-width: 120px;
+        }
+
+        #pause-btn {
+            background: linear-gradient(135deg, #42e695, #3bb2b8);
+            color: white;
+            min-width: 120px;
+        }
+
+        /* OVERLAYS */
+        .start-screen,
+        .game-over {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            backdrop-filter: blur(8px);
+            z-index: 200;
+            padding: 30px;
+        }
+
+        .start-screen {
+            background: linear-gradient(135deg, rgba(10,30,61,0.95), rgba(26,77,122,0.95));
+        }
+
+        .game-over {
+            background: linear-gradient(135deg, rgba(10,30,61,0.97), rgba(26,77,122,0.97));
+            display: none;
+        }
+
+        .overlay-content {
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            border: 2px solid rgba(255,255,255,0.2);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .instructions-list {
+            margin: 25px 0;
+            text-align: left;
+        }
+
+        .instructions-list ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .instructions-list li {
+            margin: 12px 0;
+            padding: 10px 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            border-left: 4px solid #4facfe;
+            transition: transform 0.3s ease;
+        }
+
+        .instructions-list li:hover {
+            transform: translateX(5px);
+            background: rgba(255,255,255,0.15);
+        }
+
+        /* CROSSHAIR */
+        .crosshair {
+            position: absolute;
+            width: 32px;
+            height: 32px;
+            border: 3px solid red;
+            border-radius: 50%;
+            pointer-events: none;
+            display: none;
+            z-index: 50;
+            box-shadow: 0 0 10px rgba(255,0,0,0.8);
+            animation: pulse 1.5s infinite;
+        }
+
+        .crosshair::before,
+        .crosshair::after {
+            content: '';
+            position: absolute;
+            background: red;
+        }
+
+        .crosshair::before {
+            width: 3px;
+            height: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .crosshair::after {
+            height: 3px;
+            width: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 10px rgba(255,0,0,0.8); }
+            50% { transform: scale(1.1); box-shadow: 0 0 20px rgba(255,0,0,1); }
+        }
+
+        /* COMBO DISPLAY */
+        .combo-display {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #ff6b6b, #ffd166);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            display: none;
+            z-index: 100;
+            animation: comboPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 3px solid rgba(255,255,255,0.3);
+        }
+
+        @keyframes comboPop {
+            0% { transform: translateX(-50%) scale(0); opacity: 0; }
+            70% { transform: translateX(-50%) scale(1.1); }
+            100% { transform: translateX(-50%) scale(1); opacity: 1; }
+        }
+
+        .powerup-indicator {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #ff0000, #ffffff);
+            color: #ff0000;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            display: none;
+            z-index: 100;
+            animation: powerupPulse 0.8s infinite alternate;
+        }
+
+        @keyframes powerupPulse {
+            from { transform: translateX(-50%) scale(1); }
+            to { transform: translateX(-50%) scale(1.05); }
+        }
+
+        /* DIFFICULTY SELECTOR */
+        .difficulty-selector {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .difficulty-btn {
+            padding: 8px 20px;
+            border-radius: 25px;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .difficulty-btn.active {
+            background: #4facfe;
+            border-color: #4facfe;
+            box-shadow: 0 0 15px rgba(79,172,254,0.7);
+        }
+
+        .difficulty-btn:hover:not(.active) {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .container {
+                padding: 8px 12px;
+            }
+            
+            .game-stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+                padding: 10px;
+            }
+            
+            .game-area {
+                height: 50vh;
+                min-height: 300px;
+            }
+            
+            .overlay-content {
+                padding: 25px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            button {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .subtitle {
+                font-size: 0.9rem;
+            }
+            
+            .stat-value {
+                font-size: 1.5rem;
+            }
+            
+            .game-area {
+                height: 45vh;
+                min-height: 280px;
+            }
+        }
+
+        @media (max-height: 700px) {
+            .game-area {
+                height: 50vh;
+                min-height: 300px;
+            }
+            
+            .overlay-content {
+                padding: 20px;
+            }
+        }
+
+        /* PERFORMANCE OPTIMIZATIONS */
+        .game-area * {
+            will-change: transform, opacity;
+        }
+
+        canvas {
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        /* SCROLLBAR STYLING */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, #4facfe, #00f2fe);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(to bottom, #ff6b6b, #ee5a6f);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-candy-cane"></i> Elf Snowball Hunt! <i class="fas fa-candy-cane"></i></h1>
+            <p class="subtitle">🎯 Click to throw snowballs at mischievous elves hiding in the winter park! Chain hits for massive combos!</p>
+        </header>
+
+        <div class="game-stats">
+            <div class="stat-box">
+                <div class="stat-label">⭐ Score</div>
+                <div class="stat-value" id="score">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">⏱️ Time</div>
+                <div class="stat-value" id="timer">60</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">🎯 Elves Hit</div>
+                <div class="stat-value" id="hits">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">🔥 Combo</div>
+                <div class="stat-value" id="combo">0</div>
+            </div>
+        </div>
+
+        <div class="powerup-bar">
+            <div class="powerup-fill" id="powerup-bar"></div>
+        </div>
+
+        <div class="game-area">
+            <canvas id="game-canvas"></canvas>
+            <div class="crosshair" id="crosshair"></div>
+            <div class="combo-display" id="combo-display">COMBO x2!</div>
+            <div class="powerup-indicator" id="powerup-indicator">🍬 CANDY CANE POWER! 🍬</div>
+            
+            <div class="start-screen" id="start-screen">
+                <div class="overlay-content">
+                    <h2>🎄 Elf Snowball Hunt! 🎄</h2>
+                    <p style="font-size: 1.4rem; margin: 20px 0; color: #4facfe;">Can you survive the mischievous elves?</p>
+                    
+                    <div class="difficulty-selector">
+                        <div class="difficulty-btn active" data-difficulty="easy">Easy</div>
+                        <div class="difficulty-btn" data-difficulty="normal">Normal</div>
+                        <div class="difficulty-btn" data-difficulty="hard">Hard</div>
+                    </div>
+                    
+                    <div class="instructions-list">
+                        <ul>
+                            <li>🎯 <strong>Click to throw snowballs</strong> at peeking elves</li>
+                            <li>⚡ <strong>Hit elves quickly!</strong> After 3 seconds, they fight back!</li>
+                            <li>🔥 <strong>Build combos</strong> for bonus points (up to x10!)</li>
+                            <li>🎁 <strong>Collect presents</strong> for special powerups</li>
+                            <li>🍬 <strong>Candy Cane Power</strong> = Triple shot for 10 seconds!</li>
+                            <li>🌙 <strong>Night Mode</strong> activates at 30 seconds - elves get faster!</li>
+                            <li>💥 <strong>Elf Boss</strong> appears at high combos - defeat for massive points!</li>
+                        </ul>
+                    </div>
+                    
+                    <button id="start-btn" style="margin-top: 20px; background: linear-gradient(135deg, #4facfe, #00f2fe);">
+                        <i class="fas fa-play"></i> Start Game!
+                    </button>
+                </div>
+            </div>
+            
+            <div class="game-over" id="game-over">
+                <div class="overlay-content">
+                    <h2>🎄 Game Over! 🎄</h2>
+                    <div style="margin: 25px 0; font-size: 1.2rem;">
+                        <p>Final Score: <span id="final-score" style="color: #ffd700; font-size: 1.8rem;">0</span></p>
+                        <p>Elves Hit: <span id="final-hits" style="color: #4facfe;">0</span></p>
+                        <p>Best Combo: <span id="final-combo" style="color: #ff6b6b;">0</span></p>
+                        <p>Accuracy: <span id="final-accuracy" style="color: #42e695;">0%</span></p>
+                        <p style="font-size: 1.1rem; margin-top: 15px;">Time Survived: <span id="final-time">60s</span></p>
+                    </div>
+                    <p id="rank-display" style="font-size: 1.5rem; color: #ffd700; margin: 15px 0;"></p>
+                    <button id="play-again-btn" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+                        <i class="fas fa-redo"></i> Play Again
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="instructions">
+                <p><i class="fas fa-mouse-pointer"></i> Click anywhere to throw snowballs at the elves! Chain hits for combo bonuses! <i class="fas fa-fire" style="color: #ff6b6b;"></i></p>
+            </div>
+            
+            <div class="action-buttons">
+                <button id="pause-btn"><i class="fas fa-pause"></i> Pause</button>
+                <button id="sound-btn"><i class="fas fa-volume-up"></i> Sound: ON</button>
+                <button id="reset-btn"><i class="fas fa-redo"></i> Reset Game</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ================ ENHANCED GAME CODE ================
+        
+        // Game settings by difficulty
+        const DIFFICULTY = {
+            easy: { elfSpeed: 1.0, spawnRate: 0.01, elfHealth: 1, time: 90 },
+            normal: { elfSpeed: 1.2, spawnRate: 0.015, elfHealth: 1, time: 60 },
+            hard: { elfSpeed: 1.5, spawnRate: 0.02, elfHealth: 2, time: 45 }
+        };
+
+        // Game variables
+        let score = 0;
+        let timeLeft = 60;
+        let hits = 0;
+        let misses = 0;
+        let combo = 0;
+        let maxCombo = 0;
+        let comboTimer = 0;
+        let throws = 0;
+        let gameActive = true;
+        let gameStarted = false;
+        let gamePaused = false;
+        let soundEnabled = true;
+        let currentDifficulty = 'normal';
+        let isNightTime = false;
+        let nightTimeThreshold = 30;
+        
+        // Game objects
+        let elves = [];
+        let trees = [];
+        let snowballsInAir = [];
+        let particles = [];
+        let snowflakes = [];
+        let powerups = [];
+        let candyCaneActive = false;
+        let candyCaneTimer = 0;
+        let candyCaneDuration = 10000;
+        let lastTime = 0;
+        let groundY = 0;
+        
+        // Boss variables
+        let bossActive = false;
+        let boss = null;
+        let bossSpawnScore = 1500;
+        let bossDefeated = false;
+        
+        // DOM elements
+        const scoreElement = document.getElementById('score');
+        const timerElement = document.getElementById('timer');
+        const hitsElement = document.getElementById('hits');
+        const comboElement = document.getElementById('combo');
+        const comboDisplay = document.getElementById('combo-display');
+        const gameOverElement = document.getElementById('game-over');
+        const finalScoreElement = document.getElementById('final-score');
+        const finalHitsElement = document.getElementById('final-hits');
+        const finalComboElement = document.getElementById('final-combo');
+        const finalAccuracyElement = document.getElementById('final-accuracy');
+        const finalTimeElement = document.getElementById('final-time');
+        const rankDisplay = document.getElementById('rank-display');
+        const powerupIndicator = document.getElementById('powerup-indicator');
+        const powerupBar = document.getElementById('powerup-bar');
+        const startScreen = document.getElementById('start-screen');
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        const crosshair = document.getElementById('crosshair');
+        
+        // Performance optimization
+        let lastFrameTime = 0;
+        const FPS = 60;
+        const frameInterval = 1000 / FPS;
+        
+        // Sound system
+        const soundEffects = {
+            throw: new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAZGF0YQ'),
+            hit: new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAZGF0YQ'),
+            combo: new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAZGF0YQ'),
+            powerup: new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAZGF0YQ'),
+            bossSpawn: new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAZGF0YQ')
+        };
+        
+        // Initialize all game objects
+        function initGame() {
+            resizeCanvas();
+            
+            // Reset variables
+            score = 0;
+            timeLeft = DIFFICULTY[currentDifficulty].time;
+            hits = 0;
+            misses = 0;
+            combo = 0;
+            maxCombo = 0;
+            comboTimer = 0;
+            throws = 0;
+            gameActive = false;
+            gameStarted = false;
+            gamePaused = false;
+            isNightTime = false;
+            bossActive = false;
+            bossDefeated = false;
+            
+            // Clear arrays
+            elves = [];
+            trees = [];
+            snowballsInAir = [];
+            particles = [];
+            snowflakes = [];
+            powerups = [];
+            
+            // Reset powerups
+            candyCaneActive = false;
+            candyCaneTimer = 0;
+            
+            // Update UI
+            updateUI();
+            powerupBar.style.width = '0%';
+            comboDisplay.style.display = 'none';
+            powerupIndicator.style.display = 'none';
+            gameOverElement.style.display = 'none';
+            startScreen.style.display = 'flex';
+            
+            // Create environment
+            createTrees();
+            createSnowflakes();
+            
+            // Start idle animation
+            requestAnimationFrame(idleLoop);
+        }
+        
+        // Start game
+        function startGame() {
+            gameActive = true;
+            gameStarted = true;
+            startScreen.style.display = 'none';
+            
+            timeLeft = DIFFICULTY[currentDifficulty].time;
+            updateUI();
+            
+            spawnElf();
+            lastTime = performance.now();
+            gameLoop(lastTime);
+            startTimer();
+        }
+        
+        // Resize canvas
+        function resizeCanvas() {
+            const gameArea = canvas.parentElement;
+            canvas.width = gameArea.clientWidth;
+            canvas.height = gameArea.clientHeight;
+            groundY = canvas.height * 0.75;
+        }
+        
+        // Create trees
+        function createTrees() {
+            trees = [];
+            const treeCount = 8;
+            const spacing = canvas.width / (treeCount + 1);
+            
+            for (let i = 0; i < treeCount; i++) {
+                trees.push({
+                    x: spacing * (i + 1) + (Math.random() - 0.5) * 50,
+                    y: groundY,
+                    width: 70 + Math.random() * 50,
+                    height: 110 + Math.random() * 70,
+                    color: `hsl(${120 + Math.random() * 25}, 65%, ${25 + Math.random() * 20}%)`,
+                    layer: Math.floor(Math.random() * 3)
+                });
+            }
+            
+            trees.sort((a, b) => a.layer - b.layer);
+        }
+        
+        // Create snowflakes
+        function createSnowflakes() {
+            snowflakes = [];
+            for (let i = 0; i < 80; i++) {
+                snowflakes.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 3 + 1,
+                    speed: Math.random() * 1.5 + 0.5,
+                    drift: Math.random() * 0.8 - 0.4,
+                    opacity: Math.random() * 0.5 + 0.5
+                });
+            }
+        }
+        
+        // Spawn elf
+        function spawnElf() {
+            if (!gameActive || elves.length >= 5) return;
+            
+            const tree = trees[Math.floor(Math.random() * trees.length)];
+            const side = Math.random() > 0.5 ? 1 : -1;
+            const health = DIFFICULTY[currentDifficulty].elfHealth;
+            
+            elves.push({
+                x: tree.x + side * (tree.width * 0.6),
+                y: tree.y - 40,
+                width: 50,
+                height: 60,
+                side: side,
+                tree: tree,
+                health: health,
+                maxHealth: health,
+                phase: 'peeking',
+                phaseTimer: 0,
+                peekDuration: 40,
+                timeVisible: 0,
+                throwCooldown: 0,
+                throwInterval: (isNightTime ? 1200 : 1800) / DIFFICULTY[currentDifficulty].elfSpeed,
+                isHit: false,
+                hitTimer: 0,
+                velocityX: 0,
+                velocityY: 0
+            });
+        }
+        
+        // Spawn boss
+        function spawnBoss() {
+            if (bossActive || bossDefeated) return;
+            
+            bossActive = true;
+            boss = {
+                x: canvas.width / 2,
+                y: -100,
+                width: 120,
+                height: 150,
+                health: 10,
+                maxHealth: 10,
+                phase: 'entering',
+                phaseTimer: 0,
+                velocityX: 0,
+                velocityY: 2,
+                targetX: canvas.width / 2,
+                targetY: canvas.height * 0.4,
+                attackCooldown: 0,
+                attackInterval: 1000
+            };
+            
+            // Show boss warning
+            showMessage("⚠️ ELF BOSS APPEARED! ⚠️", '#ff0000');
+        }
+        
+        // Update UI
+        function updateUI() {
+            scoreElement.textContent = score;
+            timerElement.textContent = timeLeft;
+            hitsElement.textContent = hits;
+            comboElement.textContent = combo;
+            
+            // Update powerup bar
+            if (candyCaneActive) {
+                const percent = (candyCaneTimer / candyCaneDuration) * 100;
+                powerupBar.style.width = `${percent}%`;
+            } else {
+                powerupBar.style.width = '0%';
+            }
+        }
+        
+        // Start timer
+        function startTimer() {
+            const timerInterval = setInterval(() => {
+                if (gameActive && !gamePaused) {
+                    timeLeft--;
+                    updateUI();
+                    
+                    // Check for nighttime
+                    const elapsedTime = DIFFICULTY[currentDifficulty].time - timeLeft;
+                    if (!isNightTime && elapsedTime >= nightTimeThreshold) {
+                        isNightTime = true;
+                        showMessage("🌙 NIGHTTIME! Elves are faster! 🌙", '#4facfe');
+                    }
+                    
+                    // Spawn boss if score threshold reached
+                    if (!bossActive && !bossDefeated && score >= bossSpawnScore) {
+                        spawnBoss();
+                    }
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(timerInterval);
+                        endGame();
+                    }
+                } else if (!gameActive) {
+                    clearInterval(timerInterval);
+                }
+            }, 1000);
+        }
+        
+        // Show message
+        function showMessage(text, color = '#ffd700') {
+            comboDisplay.textContent = text;
+            comboDisplay.style.color = color;
+            comboDisplay.style.display = 'block';
+            
+            setTimeout(() => {
+                if (gameActive) {
+                    comboDisplay.style.display = 'none';
+                }
+            }, 2500);
+        }
+        
+        // Idle loop for start screen
+        function idleLoop(timestamp) {
+            if (gameStarted) return;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            drawBackground();
+            drawSnowflakes();
+            drawGround();
+            drawTrees();
+            
+            // Animate some elves on start screen
+            if (Math.random() < 0.02 && elves.length < 2) {
+                const tree = trees[Math.floor(Math.random() * trees.length)];
+                elves.push({
+                    x: tree.x + (Math.random() > 0.5 ? 1 : -1) * (tree.width * 0.6),
+                    y: tree.y - 40,
+                    width: 50,
+                    height: 60,
+                    side: 1,
+                    tree: tree,
+                    phase: 'peeking',
+                    phaseTimer: 0,
+                    peekDuration: 100,
+                    isHit: false,
+                    hitTimer: 0
+                });
+            }
+            
+            updateElves(16);
+            updateParticles(16);
+            
+            requestAnimationFrame(idleLoop);
+        }
+        
+        // Main game loop
+        function gameLoop(currentTime) {
+            if (!gameActive || gamePaused) return;
+            
+            const deltaTime = Math.min(currentTime - lastTime, 100);
+            lastTime = currentTime;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Update game state
+            updateGameState(deltaTime);
+            
+            // Draw everything
+            drawBackground();
+            drawSnowflakes();
+            drawGround();
+            drawTrees();
+            drawElves();
+            drawBoss();
+            drawPowerups();
+            drawSnowballs();
+            drawParticles();
+            
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Update game state
+        function updateGameState(deltaTime) {
+            // Update timers
+            if (comboTimer > 0) {
+                comboTimer -= deltaTime;
+                if (comboTimer <= 0) {
+                    combo = 0;
+                    updateUI();
+                }
+            }
+            
+            if (candyCaneActive) {
+                candyCaneTimer -= deltaTime;
+                if (candyCaneTimer <= 0) {
+                    candyCaneActive = false;
+                    powerupIndicator.style.display = 'none';
+                }
+                updateUI();
+            }
+            
+            // Spawn elves
+            const spawnChance = DIFFICULTY[currentDifficulty].spawnRate * (isNightTime ? 1.5 : 1);
+            if (Math.random() < spawnChance && elves.length < 5 && !bossActive) {
+                spawnElf();
+            }
+            
+            // Update game objects
+            updateElves(deltaTime);
+            updateBoss(deltaTime);
+            updatePowerups(deltaTime);
+            updateSnowballs(deltaTime);
+            updateParticles(deltaTime);
+            updateSnowflakes(deltaTime);
+        }
+        
+        // Draw background
+        function drawBackground() {
+            // Sky gradient
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            
+            if (isNightTime) {
+                gradient.addColorStop(0, '#0a1128');
+                gradient.addColorStop(0.5, '#1a2b52');
+                gradient.addColorStop(1, '#2d3561');
+            } else {
+                gradient.addColorStop(0, '#87ceeb');
+                gradient.addColorStop(0.5, '#b8e0f6');
+                gradient.addColorStop(1, '#ffffff');
+            }
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Celestial body
+            if (isNightTime) {
+                // Moon with craters
+                ctx.beginPath();
+                ctx.arc(canvas.width - 80, 60, 35, 0, Math.PI * 2);
+                ctx.fillStyle = '#f4f4f4';
+                ctx.shadowColor = '#ffffff';
+                ctx.shadowBlur = 40;
+                ctx.fill();
+                
+                // Moon craters
+                ctx.fillStyle = '#e8e8e8';
+                ctx.beginPath();
+                ctx.arc(canvas.width - 95, 45, 8, 0, Math.PI * 2);
+                ctx.arc(canvas.width - 65, 70, 6, 0, Math.PI * 2);
+                ctx.arc(canvas.width - 80, 80, 10, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Stars with twinkle effect
+                const time = Date.now() * 0.001;
+                for (let i = 0; i < 50; i++) {
+                    const x = (i * 73) % canvas.width;
+                    const y = (i * 41) % (canvas.height * 0.5);
+                    const twinkle = Math.sin(time * 3 + i) * 0.3 + 0.7;
+                    
+                    ctx.beginPath();
+                    ctx.arc(x, y, Math.random() * 2 + 1, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255, 255, 255, ${twinkle})`;
+                    ctx.fill();
+                }
+            } else {
+                // Sun with rays
+                ctx.beginPath();
+                ctx.arc(canvas.width - 80, 60, 40, 0, Math.PI * 2);
+                ctx.fillStyle = '#ffd700';
+                ctx.shadowColor = '#ffed4e';
+                ctx.shadowBlur = 50;
+                ctx.fill();
+                
+                // Sun rays
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = '#ffed4e';
+                ctx.lineWidth = 3;
+                for (let i = 0; i < 12; i++) {
+                    const angle = (i * Math.PI) / 6;
+                    const length = 20;
+                    ctx.beginPath();
+                    ctx.moveTo(
+                        canvas.width - 80 + Math.cos(angle) * 45,
+                        60 + Math.sin(angle) * 45
+                    );
+                    ctx.lineTo(
+                        canvas.width - 80 + Math.cos(angle) * (45 + length),
+                        60 + Math.sin(angle) * (45 + length)
+                    );
+                    ctx.stroke();
+                }
+            }
+            
+            ctx.shadowBlur = 0;
+            
+            // Distant mountains
+            ctx.fillStyle = isNightTime ? '#1a2b52' : '#a3d5ff';
+            ctx.beginPath();
+            ctx.moveTo(0, groundY - 50);
+            for (let x = 0; x < canvas.width; x += 20) {
+                const y = groundY - 50 + Math.sin(x * 0.005) * 40 + Math.cos(x * 0.002) * 20;
+                ctx.lineTo(x, y);
+            }
+            ctx.lineTo(canvas.width, canvas.height);
+            ctx.lineTo(0, canvas.height);
+            ctx.closePath();
+            ctx.fill();
+        }
+        
+        // Update and draw snowflakes
+        function updateSnowflakes(deltaTime) {
+            for (const flake of snowflakes) {
+                flake.y += flake.speed * (deltaTime / 16);
+                flake.x += flake.drift * (deltaTime / 16);
+                
+                if (flake.y > canvas.height) {
+                    flake.y = -10;
+                    flake.x = Math.random() * canvas.width;
+                }
+                
+                if (flake.x > canvas.width) flake.x = 0;
+                if (flake.x < 0) flake.x = canvas.width;
+            }
+        }
+        
+        function drawSnowflakes() {
+            for (const flake of snowflakes) {
+                ctx.beginPath();
+                ctx.arc(flake.x, flake.y, flake.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${flake.opacity})`;
+                ctx.fill();
+                
+                // Add sparkle effect
+                if (Math.random() < 0.1) {
+                    ctx.beginPath();
+                    ctx.arc(flake.x, flake.y, flake.size * 1.5, 0, Math.PI * 2);
+                    ctx.strokeStyle = `rgba(255, 255, 255, 0.3)`;
+                    ctx.stroke();
+                }
+            }
+        }
+        
+        // Draw ground
+        function drawGround() {
+            // Snow ground with gradient
+            const gradient = ctx.createLinearGradient(0, groundY, 0, canvas.height);
+            gradient.addColorStop(0, '#ffffff');
+            gradient.addColorStop(1, '#e6f7ff');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
+            
+            // Snow texture
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            for (let i = 0; i < 20; i++) {
+                const x = Math.random() * canvas.width;
+                const y = groundY + Math.random() * 30;
+                const size = Math.random() * 4 + 2;
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        // Draw trees
+        function drawTrees() {
+            for (const tree of trees) {
+                // Tree trunk
+                ctx.fillStyle = isNightTime ? '#3d2817' : '#5d4037';
+                ctx.fillRect(tree.x - 12, tree.y - tree.height * 0.25, 24, tree.height * 0.25);
+                
+                // Tree layers
+                const layers = 5;
+                for (let i = 0; i < layers; i++) {
+                    const layerY = tree.y - tree.height + (i * tree.height / layers);
+                    const layerWidth = tree.width * (0.9 - i * 0.15);
+                    const layerHeight = tree.height / layers;
+                    
+                    // Tree layer
+                    ctx.fillStyle = tree.color;
+                    ctx.beginPath();
+                    ctx.moveTo(tree.x, layerY);
+                    ctx.lineTo(tree.x - layerWidth/2, layerY + layerHeight);
+                    ctx.lineTo(tree.x + layerWidth/2, layerY + layerHeight);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    // Snow on tree
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                    ctx.beginPath();
+                    ctx.moveTo(tree.x, layerY);
+                    ctx.lineTo(tree.x - layerWidth/3, layerY + layerHeight * 0.7);
+                    ctx.lineTo(tree.x + layerWidth/3, layerY + layerHeight * 0.7);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    // Christmas ornaments
+                    if (i % 2 === 0 && Math.random() > 0.5) {
+                        const ornamentX = tree.x + (Math.random() - 0.5) * layerWidth/2;
+                        const ornamentY = layerY + layerHeight/2;
+                        const ornamentColor = ['#ff0000', '#ffd700', '#00ff00', '#4facfe'][Math.floor(Math.random() * 4)];
+                        
+                        ctx.beginPath();
+                        ctx.arc(ornamentX, ornamentY, 5, 0, Math.PI * 2);
+                        ctx.fillStyle = ornamentColor;
+                        ctx.fill();
+                        ctx.strokeStyle = '#ffffff';
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                    }
+                }
+                
+                // Star on top
+                ctx.fillStyle = '#ffd700';
+                ctx.beginPath();
+                ctx.moveTo(tree.x, tree.y - tree.height - 5);
+                for (let i = 0; i < 5; i++) {
+                    const angle = (i * 4 * Math.PI) / 5;
+                    const radius = 8;
+                    ctx.lineTo(
+                        tree.x + Math.cos(angle) * radius,
+                        tree.y - tree.height - 5 + Math.sin(angle) * radius
+                    );
+                }
+                ctx.closePath();
+                ctx.fill();
+            }
+        }
+        
+        // Update elves
+        function updateElves(deltaTime) {
+            for (let i = elves.length - 1; i >= 0; i--) {
+                const elf = elves[i];
+                
+                if (elf.isHit) {
+                    elf.hitTimer += deltaTime;
+                    elf.x += elf.velocityX * (deltaTime / 16);
+                    elf.y += elf.velocityY * (deltaTime / 16);
+                    elf.velocityY += 0.5;
+                    
+                    if (elf.hitTimer > 100) {
+                        elves.splice(i, 1);
+                        if (gameActive) spawnElf();
+                    }
+                    continue;
+                }
+                
+                elf.phaseTimer += deltaTime;
+                
+                // State machine
+                switch (elf.phase) {
+                    case 'peeking':
+                        if (elf.phaseTimer >= elf.peekDuration) {
+                            elf.phase = 'visible';
+                            elf.phaseTimer = 0;
+                            elf.timeVisible = 0;
+                        }
+                        break;
+                        
+                    case 'visible':
+                        elf.timeVisible += deltaTime;
+                        if (elf.timeVisible >= 3000) {
+                            elf.phase = 'throwing';
+                            elf.throwCooldown = 0;
+                        }
+                        break;
+                        
+                    case 'throwing':
+                        elf.throwCooldown += deltaTime;
+                        if (elf.throwCooldown >= elf.throwInterval) {
+                            throwElfSnowball(elf);
+                            elf.throwCooldown = 0;
+                        }
+                        break;
+                }
+            }
+        }
+        
+        // Draw elves
+        function drawElves() {
+            for (const elf of elves) {
+                if (elf.isHit) {
+                    drawHitElf(elf);
+                    continue;
+                }
+                
+                let offset = 0;
+                if (elf.phase === 'peeking') {
+                    const progress = elf.phaseTimer / elf.peekDuration;
+                    offset = (1 - Math.min(progress * 2, 1)) * elf.width * 0.8;
+                }
+                
+                const drawX = elf.x + (elf.side > 0 ? offset : -offset);
+                const drawY = elf.y;
+                
+                ctx.save();
+                
+                // Warning glow for throwing elves
+                if (elf.phase === 'throwing') {
+                    ctx.shadowColor = '#ff6b6b';
+                    ctx.shadowBlur = 25;
+                }
+                
+                // Health bar for boss mode or hard difficulty
+                if (elf.health > 1) {
+                    const barWidth = 40;
+                    const barHeight = 6;
+                    const barX = drawX - barWidth/2;
+                    const barY = drawY - 50;
+                    
+                    // Background
+                    ctx.fillStyle = '#333';
+                    ctx.fillRect(barX, barY, barWidth, barHeight);
+                    
+                    // Health
+                    const healthPercent = elf.health / elf.maxHealth;
+                    ctx.fillStyle = healthPercent > 0.5 ? '#2ecc71' : 
+                                   healthPercent > 0.25 ? '#f39c12' : '#e74c3c';
+                    ctx.fillRect(barX, barY, barWidth * healthPercent, barHeight);
+                }
+                
+                // Elf body
+                ctx.fillStyle = '#2ecc71';
+                ctx.beginPath();
+                ctx.ellipse(drawX, drawY, elf.width * 0.35, elf.height * 0.4, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Elf head
+                ctx.fillStyle = '#ffd1a3';
+                ctx.beginPath();
+                ctx.arc(drawX, drawY - elf.height * 0.35, elf.width * 0.25, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Elf hat
+                ctx.fillStyle = '#e74c3c';
+                ctx.beginPath();
+                ctx.moveTo(drawX, drawY - elf.height * 0.6);
+                ctx.lineTo(drawX - elf.width * 0.25, drawY - elf.height * 0.35);
+                ctx.lineTo(drawX + elf.width * 0.25, drawY - elf.height * 0.35);
+                ctx.closePath();
+                ctx.fill();
+                
+                // Hat pom-pom
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(drawX, drawY - elf.height * 0.6, 8, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.shadowBlur = 0;
+                
+                // Eyes
+                ctx.fillStyle = '#333';
+                if (elf.phase === 'throwing') {
+                    // Angry eyes
+                    ctx.beginPath();
+                    ctx.moveTo(drawX - 12, drawY - elf.height * 0.38);
+                    ctx.lineTo(drawX - 4, drawY - elf.height * 0.35);
+                    ctx.lineTo(drawX - 12, drawY - elf.height * 0.32);
+                    ctx.fill();
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(drawX + 12, drawY - elf.height * 0.38);
+                    ctx.lineTo(drawX + 4, drawY - elf.height * 0.35);
+                    ctx.lineTo(drawX + 12, drawY - elf.height * 0.32);
+                    ctx.fill();
+                } else {
+                    // Normal eyes
+                    ctx.beginPath();
+                    ctx.arc(drawX - 8, drawY - elf.height * 0.35, 3, 0, Math.PI * 2);
+                    ctx.arc(drawX + 8, drawY - elf.height * 0.35, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                // Mouth
+                ctx.strokeStyle = '#333';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                if (elf.phase === 'throwing') {
+                    ctx.arc(drawX, drawY - elf.height * 0.25, 8, 0.2 * Math.PI, 0.8 * Math.PI);
+                } else {
+                    ctx.arc(drawX, drawY - elf.height * 0.3, 8, 0, Math.PI);
+                }
+                ctx.stroke();
+                
+                // Belt
+                ctx.fillStyle = '#000';
+                ctx.fillRect(drawX - elf.width * 0.35, drawY, elf.width * 0.7, 6);
+                
+                // Belt buckle
+                ctx.fillStyle = '#ffd700';
+                ctx.fillRect(drawX - 8, drawY - 2, 16, 10);
+                
+                // Snowball in hand if throwing
+                if (elf.phase === 'throwing' && Math.floor(elf.throwCooldown / 200) % 2 === 0) {
+                    const handX = drawX + elf.width * 0.4;
+                    const handY = drawY - elf.height * 0.1;
+                    
+                    ctx.beginPath();
+                    ctx.arc(handX, handY, 8, 0, Math.PI * 2);
+                    ctx.fillStyle = 'white';
+                    ctx.fill();
+                    ctx.strokeStyle = '#b3e0ff';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+                
+                ctx.restore();
+            }
+        }
+        
+        // Draw hit elf
+        function drawHitElf(elf) {
+            const rotation = elf.hitTimer * 0.05;
+            const alpha = 1 - (elf.hitTimer / 100);
+            
+            ctx.save();
+            ctx.translate(elf.x, elf.y);
+            ctx.rotate(rotation);
+            ctx.globalAlpha = alpha;
+            
+            // Elf body
+            ctx.fillStyle = '#e74c3c';
+            ctx.beginPath();
+            ctx.ellipse(0, 0, elf.width * 0.35, elf.height * 0.4, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Stars around hit elf
+            ctx.globalAlpha = alpha * 0.7;
+            for (let i = 0; i < 4; i++) {
+                const angle = (elf.hitTimer * 0.1) + (i * Math.PI / 2);
+                const distance = 30 + elf.hitTimer * 0.5;
+                const starX = Math.cos(angle) * distance;
+                const starY = Math.sin(angle) * distance;
+                
+                ctx.beginPath();
+                ctx.moveTo(starX, starY - 5);
+                for (let j = 0; j < 5; j++) {
+                    const starAngle = (j * 4 * Math.PI) / 5 + Math.PI/2;
+                    const radius = 3;
+                    ctx.lineTo(
+                        starX + Math.cos(starAngle) * radius,
+                        starY + Math.sin(starAngle) * radius
+                    );
+                }
+                ctx.closePath();
+                ctx.fillStyle = '#ffd700';
+                ctx.fill();
+            }
+            
+            ctx.restore();
+        }
+        
+        // Throw elf snowball
+        function throwElfSnowball(elf) {
+            const targetX = canvas.width / 2;
+            const targetY = canvas.height - 20;
+            
+            const dx = targetX - elf.x;
+            const dy = targetY - elf.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const speed = 10;
+            
+            snowballsInAir.push({
+                x: elf.x,
+                y: elf.y,
+                velocityX: (dx / distance) * speed,
+                velocityY: (dy / distance) * speed,
+                radius: 10,
+                life: 100,
+                isElfSnowball: true,
+                damage: 50
+            });
+            
+            createThrowParticles(elf.x, elf.y, true);
+        }
+        
+        // Throw player snowball
+        function throwSnowball(x, y) {
+            if (!gameActive || gamePaused) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const targetX = x - rect.left;
+            const targetY = y - rect.top;
+            
+            const startX = canvas.width / 2;
+            const startY = canvas.height - 20;
+            
+            const dx = targetX - startX;
+            const dy = targetY - startY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const speed = candyCaneActive ? 18 : 14;
+            
+            throws++;
+            
+            if (candyCaneActive) {
+                // Triple shot
+                for (let i = -1; i <= 1; i++) {
+                    const spreadAngle = Math.atan2(dy, dx) + (i * 0.2);
+                    snowballsInAir.push({
+                        x: startX,
+                        y: startY,
+                        velocityX: Math.cos(spreadAngle) * speed,
+                        velocityY: Math.sin(spreadAngle) * speed,
+                        radius: 12,
+                        life: 80,
+                        isCandyCane: true,
+                        damage: 100
+                    });
+                }
+            } else {
+                // Single shot
+                snowballsInAir.push({
+                    x: startX,
+                    y: startY,
+                    velocityX: (dx / distance) * speed,
+                    velocityY: (dy / distance) * speed,
+                    radius: 10,
+                    life: 80,
+                    damage: 50
+                });
+            }
+            
+            createThrowParticles(startX, startY, false);
+        }
+        
+        // Create throw particles
+        function createThrowParticles(x, y, isElf) {
+            for (let i = 0; i < 15; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 3 + 1;
+                const color = isElf ? '#ffcccc' : 'white';
+                
+                particles.push({
+                    x,
+                    y,
+                    velocityX: Math.cos(angle) * speed,
+                    velocityY: Math.sin(angle) * speed - 2,
+                    radius: Math.random() * 3 + 1,
+                    life: 20,
+                    color: color
+                });
+            }
+        }
+        
+        // Update snowballs
+        function updateSnowballs(deltaTime) {
+            for (let i = snowballsInAir.length - 1; i >= 0; i--) {
+                const snowball = snowballsInAir[i];
+                
+                snowball.x += snowball.velocityX * (deltaTime / 16);
+                snowball.y += snowball.velocityY * (deltaTime / 16);
+                snowball.life--;
+                
+                // Trail effect
+                if (Math.random() < 0.4) {
+                    particles.push({
+                        x: snowball.x,
+                        y: snowball.y,
+                        velocityX: snowball.velocityX * -0.2,
+                        velocityY: snowball.velocityY * -0.2,
+                        radius: snowball.radius * 0.7,
+                        life: 10,
+                        color: snowball.isCandyCane ? 
+                              (Math.random() > 0.5 ? '#ff0000' : '#ffffff') :
+                              snowball.isElfSnowball ? '#ffcccc' : 'white'
+                    });
+                }
+                
+                let hit = false;
+                
+                // Player snowball collision
+                if (!snowball.isElfSnowball) {
+                    // Check elf hits
+                    for (let j = elves.length - 1; j >= 0; j--) {
+                        const elf = elves[j];
+                        if (elf.isHit) continue;
+                        
+                        const dx = snowball.x - elf.x;
+                        const dy = snowball.y - elf.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (distance < snowball.radius + elf.width * 0.35) {
+                            hit = true;
+                            
+                            elf.health--;
+                            if (elf.health <= 0) {
+                                elf.isHit = true;
+                                elf.velocityX = (Math.random() - 0.5) * 10;
+                                elf.velocityY = -15;
+                                
+                                // Update score and combo
+                                combo++;
+                                if (combo > maxCombo) maxCombo = combo;
+                                comboTimer = 2000;
+                                
+                                const points = 100 * combo;
+                                score += points;
+                                hits++;
+                                
+                                // Show combo
+                                if (combo > 1) {
+                                    showMessage(`COMBO x${combo}! +${points}`, '#ffd700');
+                                }
+                                
+                                // Spawn powerup every 3rd combo
+                                if (combo % 3 === 0) {
+                                    spawnPowerup(elf.x, elf.y);
+                                }
+                                
+                                updateUI();
+                                createHitParticles(elf.x, elf.y);
+                            } else {
+                                // Just damaged, not defeated
+                                createHitParticles(elf.x, elf.y);
+                                showMessage(`HIT! ${elf.health} HP left`, '#ff6b6b');
+                            }
+                            break;
+                        }
+                    }
+                    
+                    // Check boss hits
+                    if (bossActive && boss) {
+                        const dx = snowball.x - boss.x;
+                        const dy = snowball.y - boss.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (distance < snowball.radius + boss.width * 0.4) {
+                            hit = true;
+                            boss.health -= snowball.isCandyCane ? 2 : 1;
+                            createHitParticles(boss.x, boss.y);
+                            
+                            if (boss.health <= 0) {
+                                bossActive = false;
+                                bossDefeated = true;
+                                score += 1000;
+                                showMessage("⭐ BOSS DEFEATED! +1000 POINTS ⭐", '#ffd700');
+                                createExplosionParticles(boss.x, boss.y, 100);
+                                updateUI();
+                            } else {
+                                showMessage(`BOSS HP: ${boss.health}/${boss.maxHealth}`, '#ff0000');
+                            }
+                        }
+                    }
+                } else {
+                    // Elf snowball collision with player
+                    if (snowball.y >= canvas.height - 50) {
+                        hit = true;
+                        score = Math.max(0, score - snowball.damage);
+                        combo = 0;
+                        updateUI();
+                        createExplosionParticles(snowball.x, snowball.y, 30);
+                        showMessage(`-${snowball.damage} POINTS!`, '#ff6b6b');
+                    }
+                }
+                
+                // Remove if hit or expired
+                if (hit || snowball.life <= 0) {
+                    if (hit) {
+                        createExplosionParticles(snowball.x, snowball.y, 20);
+                    }
+                    snowballsInAir.splice(i, 1);
+                }
+            }
+        }
+        
+        // Draw snowballs
+        function drawSnowballs() {
+            for (const snowball of snowballsInAir) {
+                if (snowball.isCandyCane) {
+                    // Candy cane projectile
+                    ctx.save();
+                    ctx.shadowColor = '#ff0000';
+                    ctx.shadowBlur = 20;
+                    
+                    // Rotating stripes
+                    const time = Date.now() * 0.01;
+                    const stripes = 8;
+                    for (let i = 0; i < stripes; i++) {
+                        ctx.beginPath();
+                        ctx.arc(
+                            snowball.x, snowball.y, snowball.radius,
+                            (i/stripes) * Math.PI * 2 + time,
+                            ((i+0.5)/stripes) * Math.PI * 2 + time
+                        );
+                        ctx.lineTo(snowball.x, snowball.y);
+                        ctx.closePath();
+                        ctx.fillStyle = i % 2 === 0 ? '#ff0000' : '#ffffff';
+                        ctx.fill();
+                    }
+                    
+                    ctx.shadowBlur = 0;
+                    ctx.restore();
+                } else {
+                    // Regular snowball
+                    const gradient = ctx.createRadialGradient(
+                        snowball.x, snowball.y, 1,
+                        snowball.x, snowball.y, snowball.radius
+                    );
+                    
+                    if (snowball.isElfSnowball) {
+                        gradient.addColorStop(0, '#ffcccc');
+                        gradient.addColorStop(1, '#ff6666');
+                    } else {
+                        gradient.addColorStop(0, '#ffffff');
+                        gradient.addColorStop(1, '#80d4ff');
+                    }
+                    
+                    ctx.beginPath();
+                    ctx.arc(snowball.x, snowball.y, snowball.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = gradient;
+                    ctx.fill();
+                    
+                    // Highlight
+                    ctx.beginPath();
+                    ctx.arc(
+                        snowball.x - snowball.radius/3,
+                        snowball.y - snowball.radius/3,
+                        snowball.radius/3,
+                        0, Math.PI * 2
+                    );
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+                    ctx.fill();
+                }
+            }
+        }
+        
+        // Spawn powerup
+        function spawnPowerup(x, y) {
+            powerups.push({
+                x: x,
+                y: y,
+                width: 40,
+                height: 40,
+                velocityY: -8,
+                gravity: 0.3,
+                bounces: 0,
+                rotation: 0,
+                rotationSpeed: 0.05,
+                type: Math.random() > 0.7 ? 'time' : 'candy' // 30% chance for time powerup
+            });
+        }
+        
+        // Update powerups
+        function updatePowerups(deltaTime) {
+            for (let i = powerups.length - 1; i >= 0; i--) {
+                const powerup = powerups[i];
+                
+                powerup.velocityY += powerup.gravity;
+                powerup.y += powerup.velocityY * (deltaTime / 16);
+                powerup.rotation += powerup.rotationSpeed;
+                
+                // Bounce on ground
+                if (powerup.y >= groundY - powerup.height/2) {
+                    powerup.y = groundY - powerup.height/2;
+                    powerup.velocityY *= -0.7;
+                    powerup.bounces++;
+                    
+                    if (powerup.bounces > 2) {
+                        powerup.velocityY = 0;
+                    }
+                }
+                
+                // Sparkle effect
+                if (Math.random() < 0.2) {
+                    particles.push({
+                        x: powerup.x + (Math.random() - 0.5) * 50,
+                        y: powerup.y + (Math.random() - 0.5) * 50,
+                        velocityX: (Math.random() - 0.5) * 2,
+                        velocityY: (Math.random() - 0.5) * 2,
+                        radius: Math.random() * 2 + 1,
+                        life: 20,
+                        color: powerup.type === 'time' ? '#4facfe' : '#ff0000'
+                    });
+                }
+            }
+        }
+        
+        // Draw powerups
+        function drawPowerups() {
+            for (const powerup of powerups) {
+                ctx.save();
+                ctx.translate(powerup.x, powerup.y);
+                ctx.rotate(powerup.rotation);
+                
+                // Glow effect
+                ctx.shadowColor = powerup.type === 'time' ? '#4facfe' : '#ff0000';
+                ctx.shadowBlur = 25;
+                
+                // Present box
+                ctx.fillStyle = powerup.type === 'time' ? '#4facfe' : '#ff0000';
+                ctx.fillRect(-powerup.width/2, -powerup.height/2, powerup.width, powerup.height);
+                
+                // Ribbon
+                ctx.fillStyle = '#ffd700';
+                ctx.fillRect(-powerup.width/2, -3, powerup.width, 6);
+                ctx.fillRect(-3, -powerup.height/2, 6, powerup.height);
+                
+                // Bow
+                ctx.beginPath();
+                ctx.arc(-10, -powerup.height/2 - 5, 8, 0, Math.PI * 2);
+                ctx.arc(10, -powerup.height/2 - 5, 8, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.beginPath();
+                ctx.arc(0, -powerup.height/2 - 5, 6, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Icon
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '20px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(powerup.type === 'time' ? '⏱️' : '🍬', 0, 0);
+                
+                ctx.shadowBlur = 0;
+                ctx.restore();
+            }
+        }
+        
+        // Collect powerup
+        function collectPowerup(x, y) {
+            for (let i = powerups.length - 1; i >= 0; i--) {
+                const powerup = powerups[i];
+                const dx = x - powerup.x;
+                const dy = y - powerup.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < powerup.width) {
+                    if (powerup.type === 'time') {
+                        // Add time
+                        timeLeft += 10;
+                        showMessage("+10 SECONDS! ⏱️", '#4facfe');
+                        updateUI();
+                    } else {
+                        // Activate candy cane
+                        candyCaneActive = true;
+                        candyCaneTimer = candyCaneDuration;
+                        powerupIndicator.style.display = 'block';
+                        showMessage("🍬 CANDY CANE POWER ACTIVATED! 🍬", '#ff0000');
+                    }
+                    
+                    // Celebration particles
+                    createExplosionParticles(powerup.x, powerup.y, 50);
+                    
+                    powerups.splice(i, 1);
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        // Update boss
+        function updateBoss(deltaTime) {
+            if (!bossActive || !boss) return;
+            
+            boss.phaseTimer += deltaTime;
+            
+            switch (boss.phase) {
+                case 'entering':
+                    boss.x += (boss.targetX - boss.x) * 0.05;
+                    boss.y += (boss.targetY - boss.y) * 0.05;
+                    
+                    if (Math.abs(boss.x - boss.targetX) < 5 && Math.abs(boss.y - boss.targetY) < 5) {
+                        boss.phase = 'attacking';
+                        boss.phaseTimer = 0;
+                    }
+                    break;
+                    
+                case 'attacking':
+                    boss.attackCooldown += deltaTime;
+                    
+                    // Move side to side
+                    boss.x += Math.sin(boss.phaseTimer * 0.002) * 2;
+                    
+                    if (boss.attackCooldown >= boss.attackInterval) {
+                        // Boss attack - shoot multiple snowballs
+                        for (let i = 0; i < 5; i++) {
+                            const angle = (i * Math.PI * 2) / 5;
+                            snowballsInAir.push({
+                                x: boss.x,
+                                y: boss.y,
+                                velocityX: Math.cos(angle) * 8,
+                                velocityY: Math.sin(angle) * 8,
+                                radius: 15,
+                                life: 150,
+                                isElfSnowball: true,
+                                isBossAttack: true,
+                                damage: 100
+                            });
+                        }
+                        boss.attackCooldown = 0;
+                        createThrowParticles(boss.x, boss.y, true);
+                    }
+                    break;
+            }
+        }
+        
+        // Draw boss
+        function drawBoss() {
+            if (!bossActive || !boss) return;
+            
+            ctx.save();
+            
+            // Boss glow
+            ctx.shadowColor = '#ff0000';
+            ctx.shadowBlur = 30;
+            
+            // Boss body
+            ctx.fillStyle = '#e74c3c';
+            ctx.beginPath();
+            ctx.ellipse(boss.x, boss.y, boss.width * 0.4, boss.height * 0.45, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Boss crown
+            ctx.fillStyle = '#ffd700';
+            for (let i = 0; i < 5; i++) {
+                const spikeX = boss.x - boss.width * 0.3 + (i * boss.width * 0.15);
+                const spikeY = boss.y - boss.height * 0.5;
+                ctx.beginPath();
+                ctx.moveTo(spikeX, spikeY);
+                ctx.lineTo(spikeX + 15, spikeY - 25);
+                ctx.lineTo(spikeX + 30, spikeY);
+                ctx.closePath();
+                ctx.fill();
+            }
+            
+            // Health bar
+            const barWidth = 100;
+            const barHeight = 10;
+            const barX = boss.x - barWidth/2;
+            const barY = boss.y - boss.height * 0.6;
+            
+            ctx.fillStyle = '#333';
+            ctx.fillRect(barX, barY, barWidth, barHeight);
+            
+            const healthPercent = boss.health / boss.maxHealth;
+            ctx.fillStyle = healthPercent > 0.5 ? '#2ecc71' : 
+                           healthPercent > 0.25 ? '#f39c12' : '#e74c3c';
+            ctx.fillRect(barX, barY, barWidth * healthPercent, barHeight);
+            
+            // Boss text
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('ELF BOSS', boss.x, barY - 5);
+            
+            ctx.shadowBlur = 0;
+            ctx.restore();
+        }
+        
+        // Create hit particles
+        function createHitParticles(x, y) {
+            for (let i = 0; i < 25; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 8 + 2;
+                const colors = ['#ffd700', '#ff6b6b', '#4facfe', '#ffffff'];
+                
+                particles.push({
+                    x,
+                    y,
+                    velocityX: Math.cos(angle) * speed,
+                    velocityY: Math.sin(angle) * speed - 5,
+                    radius: Math.random() * 4 + 2,
+                    life: 40,
+                    color: colors[Math.floor(Math.random() * colors.length)]
+                });
+            }
+        }
+        
+        // Create explosion particles
+        function createExplosionParticles(x, y, count) {
+            for (let i = 0; i < count; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 6 + 2;
+                
+                particles.push({
+                    x,
+                    y,
+                    velocityX: Math.cos(angle) * speed,
+                    velocityY: Math.sin(angle) * speed,
+                    radius: Math.random() * 3 + 1,
+                    life: 30,
+                    color: 'white'
+                });
+            }
+        }
+        
+        // Update particles
+        function updateParticles(deltaTime) {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const particle = particles[i];
+                
+                particle.x += particle.velocityX * (deltaTime / 16);
+                particle.y += particle.velocityY * (deltaTime / 16);
+                particle.velocityY += 0.2;
+                particle.life--;
+                
+                if (particle.life > 0) {
+                    const alpha = particle.life / 40;
+                    ctx.globalAlpha = alpha;
+                    ctx.beginPath();
+                    ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = particle.color;
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                } else {
+                    particles.splice(i, 1);
+                }
+            }
+        }
+        
+        // Draw particles
+        function drawParticles() {
+            // Already drawn in updateParticles
+        }
+        
+        // End game
+        function endGame() {
+            gameActive = false;
+            
+            const accuracy = throws > 0 ? Math.round((hits / throws) * 100) : 0;
+            
+            finalScoreElement.textContent = score;
+            finalHitsElement.textContent = hits;
+            finalComboElement.textContent = maxCombo;
+            finalAccuracyElement.textContent = `${accuracy}%`;
+            finalTimeElement.textContent = `${DIFFICULTY[currentDifficulty].time - timeLeft}s`;
+            
+            // Determine rank
+            let rank = '';
+            if (score >= 5000) rank = '🏆 LEGENDARY ELF HUNTER! 🏆';
+            else if (score >= 3000) rank = '⭐ MASTER SNOWBALLER ⭐';
+            else if (score >= 2000) rank = '🎯 EXPERT THROWER';
+            else if (score >= 1000) rank = '❄️ SKILLED MARKSMAN';
+            else if (score >= 500) rank = '🎄 GOOD EFFORT!';
+            else rank = '⛄ KEEP PRACTICING!';
+            
+            rankDisplay.textContent = rank;
+            gameOverElement.style.display = 'flex';
+        }
+        
+        // Pause game
+        function togglePause() {
+            if (!gameStarted || !gameActive) return;
+            
+            gamePaused = !gamePaused;
+            const pauseBtn = document.getElementById('pause-btn');
+            const icon = pauseBtn.querySelector('i');
+            
+            if (gamePaused) {
+                icon.className = 'fas fa-play';
+                pauseBtn.innerHTML = '<i class="fas fa-play"></i> Resume';
+                showMessage("GAME PAUSED", '#4facfe');
+            } else {
+                icon.className = 'fas fa-pause';
+                pauseBtn.innerHTML = '<i class="fas fa-pause"></i> Pause';
+                lastTime = performance.now();
+                gameLoop(lastTime);
+            }
+        }
+        
+        // Toggle sound
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const soundBtn = document.getElementById('sound-btn');
+            const icon = soundBtn.querySelector('i');
+            
+            if (soundEnabled) {
+                icon.className = 'fas fa-volume-up';
+                soundBtn.innerHTML = '<i class="fas fa-volume-up"></i> Sound: ON';
+            } else {
+                icon.className = 'fas fa-volume-mute';
+                soundBtn.innerHTML = '<i class="fas fa-volume-mute"></i> Sound: OFF';
+            }
+        }
+        
+        // Event listeners
+        canvas.addEventListener('click', (e) => {
+            if (!gameActive || gamePaused) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const clickY = e.clientY - rect.top;
+            
+            if (!collectPowerup(clickX, clickY)) {
+                throwSnowball(e.clientX, e.clientY);
+            }
+        });
+        
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            crosshair.style.left = (e.clientX - rect.left - 16) + 'px';
+            crosshair.style.top = (e.clientY - rect.top - 16) + 'px';
+            crosshair.style.display = 'block';
+        });
+        
+        canvas.addEventListener('mouseleave', () => {
+            crosshair.style.display = 'none';
+        });
+        
+        // Button event listeners
+        document.getElementById('reset-btn').addEventListener('click', initGame);
+        document.getElementById('play-again-btn').addEventListener('click', initGame);
+        document.getElementById('start-btn').addEventListener('click', startGame);
+        document.getElementById('pause-btn').addEventListener('click', togglePause);
+        document.getElementById('sound-btn').addEventListener('click', toggleSound);
+        
+        // Difficulty selection
+        document.querySelectorAll('.difficulty-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentDifficulty = this.dataset.difficulty;
+            });
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            createTrees();
+            createSnowflakes();
+        });
+        
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && gameStarted && gameActive) {
+                e.preventDefault();
+                togglePause();
+            }
+            if (e.code === 'KeyR' && gameActive) {
+                initGame();
+            }
+            if (e.code === 'KeyM') {
+                toggleSound();
+            }
+        });
+        
+        // Initialize the game
+        initGame();
+    </script>
+</body>
+</html>
